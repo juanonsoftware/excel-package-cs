@@ -11,10 +11,10 @@ namespace ConsoleApplication1
     {
         static void Main(string[] args)
         {
-            FileInfo newFile = new FileInfo(@"Book1_Data.xlsx");
-            FileInfo template = new FileInfo(@"Book1.xlsx");
+            var newFile = new FileInfo(@"Book1_Data.xlsx");
+            var template = new FileInfo(@"Book1.xlsx");
 
-            using (ExcelPackage xlPackage = new ExcelPackage(newFile, template))
+            using (var xlPackage = new ExcelPackage(newFile, template))
             {
                 ExcelWorksheet worksheet = xlPackage.Workbook.Worksheets["Sheet1"];
                 ExcelCell cell;
@@ -23,7 +23,7 @@ namespace ConsoleApplication1
 
                 GetUsers().ToList().ForEach(user =>
                                             {
-                                                if (row >= startRow)
+                                                if (row >= startRow + 3)
                                                 {
                                                     worksheet.InsertRow(row);
                                                 }
@@ -33,12 +33,25 @@ namespace ConsoleApplication1
                                                 worksheet.Cell(row, 3).Value = user.Email;
                                                 worksheet.Cell(row, 4).Value = user.Value.ToString(CultureInfo.InvariantCulture);
 
+                                                worksheet.Cell(row, 4).Style = (user.Value <= 0)
+                                                    ? "Bad"
+                                                    : (user.Value >= 1) ? "Good" : string.Empty;
+
                                                 // insert the email address as a hyperlink for the name
                                                 string hyperlink = "mailto:" + user.Email;
                                                 worksheet.Cell(row, 3).Hyperlink = new Uri(hyperlink, UriKind.Absolute);
 
                                                 row++;
                                             });
+
+                for (int iCol = 1; iCol < 4; iCol++)
+                {
+                    cell = worksheet.Cell(startRow, iCol);
+                    for (int iRow = startRow; iRow <= row; iRow++)
+                    {
+                        worksheet.Cell(iRow, iCol).StyleID = cell.StyleID;
+                    }
+                }
 
                 xlPackage.Save();
             }
@@ -52,19 +65,31 @@ namespace ConsoleApplication1
                        {
                            Email = "huanhvhd@gmail.com",
                            Name = "HOANG VAN HUAN",
-                           Value = 1.1
+                           Value = 0.9
                        }, 
                        new UserDto()
                        {
                            Email = "hhoangvan@pentalog.fr",
                            Name = "Huan HOANG VAN",
-                           Value = 2.3
+                           Value = 0.3
                        }, 
                        new UserDto()
                        {
                            Email = "hi@pentalog.fr",
                            Name = "Hi VN",
                            Value = 2.1
+                       }, 
+                       new UserDto()
+                       {
+                           Email = "lta@pentalog.fr",
+                           Name = "Lta VN",
+                           Value = 2.11
+                       }, 
+                        new UserDto()
+                       {
+                           Email = "lta@pentalog.fr",
+                           Name = "Lta VN",
+                           Value = 0
                        }, 
                    };
         }
